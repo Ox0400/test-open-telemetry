@@ -4,10 +4,11 @@
 # @Email: zhipeng.py@gmail.com
 # @Date:   2022-06-21 18:26:58
 # @Last Modified By:    zhipeng
-# @Last Modified: 2022-06-22 13:00:09
+# @Last Modified: 2022-06-22 15:00:22
 
 
 import os
+import logging
 # os.environ['OTEL_SERVICE_NAME'] = 'webapp-cli'
 # os.environ['OTEL_EXPORTER_OTLP_ENDPOINT']='http://localhost:4317'
 from sys import argv
@@ -16,12 +17,14 @@ from requests import get, Session
 from opentelemetry import trace
 from opentelemetry.propagate import inject
 # from opentelemetry.trace.status import StatusCode
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
 
 from generate_provider import tracer_provider
 
 trace.set_tracer_provider(tracer_provider)
 tracer = trace.get_tracer_provider().get_tracer(__name__)
 
+LoggingInstrumentor().instrument(set_logging_format=True)
 
 uri = 'new?hello=1'
 if len(argv) == 1:
@@ -44,5 +47,6 @@ with tracer.start_as_current_span("client") as root:
         res = req.get("http://localhost:7080/short", headers=headers,)
         print(res.request.headers)
         print(res.headers)
+    logging.info('finished ~~')
         #assert res.status_code == 200
         #root.status._status_code = StatusCode.OK
