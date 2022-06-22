@@ -4,7 +4,7 @@
 # @Email: zhipeng.py@gmail.com
 # @Date:   2022-06-21 18:26:58
 # @Last Modified By:    zhipeng
-# @Last Modified: 2022-06-22 15:00:22
+# @Last Modified: 2022-06-22 18:13:17
 
 
 import os
@@ -24,6 +24,7 @@ from generate_provider import tracer_provider
 trace.set_tracer_provider(tracer_provider)
 tracer = trace.get_tracer_provider().get_tracer(__name__)
 
+# https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/logging/logging.html
 LoggingInstrumentor().instrument(set_logging_format=True)
 
 uri = 'new?hello=1'

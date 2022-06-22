@@ -4,7 +4,7 @@
 # @Email: zhipeng.py@gmail.com
 # @Date:   2022-06-21 18:26:37
 # @Last Modified By:    zhipeng
-# @Last Modified: 2022-06-22 12:59:13
+# @Last Modified: 2022-06-22 18:12:40
 
 
 import os
@@ -58,6 +58,7 @@ class Inner(tornado.web.RequestHandler):
 
     @property
     def root(self):
+        # https://github.com/open-telemetry/opentelemetry-python-contrib/blob/62e0a31ff9c95efa0110e7cd1bc23b59bc7bdcc8/instrumentation/opentelemetry-instrumentation-tornado/src/opentelemetry/instrumentation/tornado/__init__.py#L197
         self._root = self._root \
             or (self._otel_trace_context_key and self._otel_trace_context_key.span) \
             or _start_span(self.tracer, self, _time_ns()).span

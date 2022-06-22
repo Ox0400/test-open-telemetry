@@ -1,8 +1,10 @@
 version: "2"
 services:
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/examples/demo/docker-compose.yaml
 
   # Jaeger
   jaeger-all-in-one:
+    # https://www.jaegertracing.io/docs/1.35/getting-started/
     image: jaegertracing/all-in-one:latest
     ports:
       - "16686:16686"
@@ -43,4 +45,3 @@ services:
       - ./prometheus.yaml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
-
