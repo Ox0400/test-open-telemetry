@@ -1,3 +1,12 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+# @Author: zhipeng
+# @Email: zhipeng.py@gmail.com
+# @Date:   2022-06-21 18:26:51
+# @Last Modified By:    zhipeng
+# @Last Modified: 2022-06-22 11:07:48
+
+
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import ( OTLPLogExporter,)
 from opentelemetry.exporter.otlp.proto.grpc._metric_exporter import ( OTLPMetricExporter,)

@@ -28,3 +28,5 @@ OTEL_SERVICE_NAME=webapp-cli python3 cli.py
 ### verify logs
 - prometheus  http://localhost:9090/graph?g0.expr=otelcol_exporter_sent_spans&g0.tab=0&g0.stacked=0&g0.show_exemplars=1&g0.range_input=1h
 - zipkin http://localhost:9411/zipkin/
+- jaeger http://localhost:16686/search
+- otel metrics http://localhost:8888/metrics
