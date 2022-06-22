@@ -4,42 +4,44 @@
 # @Email: zhipeng.py@gmail.com
 # @Date:   2022-06-21 18:26:37
 # @Last Modified By:    zhipeng
-# @Last Modified: 2022-06-22 11:07:38
+# @Last Modified: 2022-06-22 12:59:13
 
 
 import os
 # before import opentelemetry required
-os.environ['OTEL_SERVICE_NAME'] = 'test-webapp'
+# os.environ['OTEL_SERVICE_NAME'] = 'test-webapp'
 import time
+import socket
+
 import tornado.ioloop
 import tornado.web
 from tornado.httpclient import AsyncHTTPClient
 from tornado import gen
-
 from tornado.concurrent import futures
 from tornado.concurrent import run_on_executor
 from tornado.ioloop import IOLoop
 from tornado.httpserver import HTTPServer
 from tornado.netutil import bind_sockets
 
-import socket
 from opentelemetry.util._time import _time_ns
-
-from opentelemetry.sdk.resources import SERVICE_NAME
 from opentelemetry.instrumentation.tornado import TornadoInstrumentor
 from opentelemetry.instrumentation.tornado import _start_span
 from opentelemetry import trace
-from opentelemetry.context import get_current
-from opentelemetry.trace.status import StatusCode
+# from opentelemetry.context import get_current
+# from opentelemetry.trace.status import StatusCode
+# from opentelemetry.sdk.resources import SERVICE_NAME
 
 
 from generate_provider import tracer_provider
+
+
 def server_request_hook(span, handler):
     handler._root = span
     handler._root_ctx = trace.set_span_in_context(span)
     print ('handler ~~', handler)
     print ('handler root~~', handler.root)
     print ('handler root ctx~~', handler.root_ctx)
+
 
 trace.set_tracer_provider(tracer_provider)
 tracer = trace.get_tracer(__name__)
@@ -48,16 +50,21 @@ TornadoInstrumentor().instrument(server_request_hook=server_request_hook)
 
 print ('tracer', dir(tracer))
 
+
 class Inner(tornado.web.RequestHandler):
     _root = None
     _root_ctx = None
     _otel_trace_context_key = None
+
     @property
     def root(self):
-        self._root = self._root or (self._otel_trace_context_key and self._otel_trace_context_key.span) or _start_span(self.tracer, self, _time_ns()).span
+        self._root = self._root \
+            or (self._otel_trace_context_key and self._otel_trace_context_key.span) \
+            or _start_span(self.tracer, self, _time_ns()).span
         #print ('root ctx', self._otel_trace_context_key.span)
         print ('root span', self._root)
         return self._root
+
     @property
     def root_ctx(self):
         if not self._root_ctx:
@@ -66,16 +73,17 @@ class Inner(tornado.web.RequestHandler):
             print('00000 root ctx', type(self._root_ctx), self._root_ctx)
         print('11111 root ctx', type(self._root_ctx), self._root_ctx)
         return self._root_ctx
+
     @property
     def tracer(self):
         return self.application.tracer
 
     def on_finish(self):
         with self.tracer.start_as_current_span("audit_task", context=self.root_ctx):
-        #with self.tracer.start_as_current_span("audit_task", ):
+            # with self.tracer.start_as_current_span("audit_task", ):
             time.sleep(0.05)
 
-    #@tracer.start_as_current_span("root get")
+    # @tracer.start_as_current_span("root get")
     @gen.coroutine
     def get(self, *args, **kwargs):
         yield IOLoop.current().run_in_executor(None, self._get, *args, **kwargs)
@@ -90,10 +98,10 @@ class Inner(tornado.web.RequestHandler):
         super(Inner, self).set_status(status_code, *args, **kwargs)
         #print ('set status', self.root_span, StatusCode.OK)
         #self.root_span.status._status_code = StatusCode.OK
-        #self.root_span.set_status(1)
+        # self.root_span.set_status(1)
 
     def sleep(self, t=2, msg=''):
-        #with self.tracer.start_as_current_span("sleeping %ss" % t, context=self.ctx):
+        # with self.tracer.start_as_current_span("sleeping %ss" % t, context=self.ctx):
         print ('root span', self.root)
         print ('root ctx', self.root_ctx)
         with self.tracer.start_as_current_span("sleeping", context=self.root_ctx):
@@ -102,6 +110,7 @@ class Inner(tornado.web.RequestHandler):
                 print ('blocking %s/%s' % (i+1, t))
             msg = ('done: %s/%s, %s' % (i+1, t, msg))
             self.write(msg)
+
 
 class LongHandler(Inner):
     def _get(self):
@@ -112,11 +121,13 @@ class ShortHandler(Inner):
 
     def _get(self):
         with self.tracer.start_as_current_span("pew pass ..."):
-        #with self.tracer.start_as_current_span("pew pass ...", context=self.ctx):
+            # with self.tracer.start_as_current_span("pew pass ...", context=self.ctx):
             print('pew')
+
 
 class NewHandler(Inner):
     executor = futures.ThreadPoolExecutor()
+
     @gen.coroutine
     def get(self, *args, **kwargs):
         yield self._get(*args, **kwargs)
@@ -128,14 +139,17 @@ class NewHandler(Inner):
 
 class OldHandler(Inner):
     executor = futures.ThreadPoolExecutor()
+
     @run_on_executor
     def get(self, *args, **kwargs):
-        #with self.tracer.start_as_current_span('real get') as foo:
+        # with self.tracer.start_as_current_span('real get') as foo:
         #    print ('span foo', foo)
         #    self._get(*args, **kwargs)
         return self._get(*args, **kwargs)
+
     def _get(self, *args, **kwargs):
         self.sleep(msg='on executor')
+
 
 class CustomHttpServer(HTTPServer):
     def bind(self, port, address=None, family=socket.AF_UNSPEC, backlog=128, reuse_port=True):
@@ -175,7 +189,8 @@ class Master(tornado.web.Application):
     def engarde(self):
         self.io_loop.start()
 
+
 if __name__ == "__main__":
     keeper = Master()
-    #keeper.listen(7080)
+    # keeper.listen(7080)
     keeper.engarde()

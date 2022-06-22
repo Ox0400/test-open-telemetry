@@ -1,6 +1,6 @@
 ### pre isntall
 ```shell
-python3 -m pip install opentelemetry-exporter-otlp opentelemetry-exporter-prometheus opentelemetry-exporter-zipkin opentelemetry-exporter-otlp-proto-grpc opentelemetry-exporter-otlp-proto-http
+python3 -m pip install tornado requests opentelemetry-exporter-otlp opentelemetry-exporter-prometheus opentelemetry-exporter-zipkin opentelemetry-exporter-otlp-proto-grpc opentelemetry-exporter-otlp-proto-http
 
 ```
 
