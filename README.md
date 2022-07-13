@@ -1,6 +1,6 @@
 ### pre isntall
 ```shell
-python3 -m pip install tornado requests opentelemetry-exporter-otlp opentelemetry-exporter-prometheus opentelemetry-exporter-zipkin opentelemetry-exporter-otlp-proto-grpc opentelemetry-exporter-otlp-proto-http
+python3 -m pip install tornado requests opentelemetry-api opentelemetry-sdk opentelemetry-instrumentation-tornado opentelemetry-exporter-otlp opentelemetry-exporter-prometheus opentelemetry-exporter-zipkin opentelemetry-exporter-otlp-proto-grpc opentelemetry-exporter-otlp-proto-http opentelemetry-instrumentation-tornado
 
 ```
 
@@ -22,6 +22,9 @@ OTEL_SERVICE_NAME=test-webapp python run_executor.py
 ### test web client
 
 ```shell
+export OTEL_SERVICE_NAME=client-app
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+export OTEL_PYTHON_TORNADO_EXCLUDED_URLS='^/$,/actions/messages/notify*'
 OTEL_SERVICE_NAME=webapp-cli python3 cli.py
 ```
 
